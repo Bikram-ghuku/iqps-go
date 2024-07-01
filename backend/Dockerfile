@@ -1,8 +1,13 @@
 FROM golang:1.21 AS builder
 
 WORKDIR /src
-COPY . .
+
+COPY go.mod go.sum ./
+
 RUN go mod download
+
+COPY . .
+
 RUN CGO_ENABLED=1 GOOS=linux go build -o /app --tags "fts5" -a -ldflags '-linkmode external -extldflags "-static"' .
 
 FROM busybox:1.36-musl
@@ -10,7 +15,6 @@ FROM busybox:1.36-musl
 # Copy metaploy configuration
 COPY metaploy/iqps.metaploy.conf /
 COPY metaploy/postinstall.sh /
-
 # Set the postinstall script as executable
 RUN chmod +x /postinstall.sh
 
